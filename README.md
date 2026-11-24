@@ -24,7 +24,7 @@ The plugin reads your shared Timeline Pro history over the network. It has no of
 
 From Obsidian: open **Settings › Community plugins › Browse**, search for **Timeline Location History**, then select **Install** and **Enable**.
 
-By hand: copy `main.js`, `manifest.json` and `styles.css` from a [release](../../releases) into `<your vault>/.obsidian/plugins/timeline-location-history/`, then enable the plugin under **Settings › Community plugins**.
+By hand: copy `main.js`, `manifest.json` and `styles.css` from a [release](https://github.com/marcelmarais/timeline-obsidian-plugin/releases) into `<your vault>/.obsidian/plugins/timeline-location-history/`, then enable the plugin under **Settings › Community plugins**.
 
 ## Connect
 
