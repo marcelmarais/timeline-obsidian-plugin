@@ -1,0 +1,14 @@
+/* Timeline: Location History. Obsidian's own variables only, so every theme applies. */
+
+.timeline-location-history-status-problem {
+  color: var(--text-error);
+}
+
+.timeline-location-history-status-connected {
+  color: var(--text-success);
+}
+
+.timeline-location-history-date {
+  display: block;
+  color: var(--text-muted);
+}
