@@ -6,7 +6,7 @@ import { DateModal } from "./date-modal";
 import { addDays, localToday } from "./dates";
 import { formatCurrent, formatDay } from "./format";
 import { obsidianAuthStorage, obsidianHttp } from "./obsidian-http";
-import { minimalEdit, startMarker, upsertBlock } from "./section";
+import { endMarker, hasBlock, minimalEdit, startMarker, upsertBlock } from "./section";
 import { defaultSettings, type TimelineSettings, TimelineSettingTab } from "./settings";
 
 /** How often an open daily note for today is refreshed. */
@@ -22,7 +22,7 @@ type SyncResult = "updated" | "unchanged";
 class BrokenMarkers extends Error {
   constructor(file: TFile) {
     super(
-      `${file.basename} has an incomplete Timeline block. Keep both the <!-- timeline:start --> and <!-- timeline:end --> lines, or remove both, and sync again.`,
+      `${file.basename} has an incomplete Timeline block. Keep both the ${startMarker} and ${endMarker} lines, or remove both, and sync again.`,
     );
     this.name = "BrokenMarkers";
   }
@@ -263,7 +263,7 @@ export default class TimelinePlugin extends Plugin {
       await this.quietSync(file, date);
     } else if (date === addDays(today, -1)) {
       const content = await this.app.vault.cachedRead(file);
-      if (content.includes(startMarker)) await this.quietSync(file, date);
+      if (hasBlock(content)) await this.quietSync(file, date);
     }
   }
 

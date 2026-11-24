@@ -188,16 +188,16 @@ describe("a day's places", () => {
       arrival: "2026-11-24T12:00:00+01:00",
       departure: "2026-11-24T12:30:00+01:00",
       place: place({ name: "*Bar* <b>#1</b> $5 [x]" }),
-      notes: [{ author: "you", text: "<!-- timeline:end -->\nnext line", yours: true }],
+      notes: [{ author: "you", text: "%% timeline:end %%\nnext line", yours: true }],
     });
     const text = formatDay(day({ stops: [tricky] }), defaultFormat, now);
     expect(text).toBe(
       [
         "- 12:00–12:30 · **\\*Bar\\* \\<b\\>\\#1\\</b\\> \\$5 \\[x\\]** (30m)",
-        "  - Note: \\<!-- timeline:end --\\> next line",
+        "  - Note: \\%\\% timeline:end \\%\\% next line",
       ].join("\n"),
     );
-    expect(text).not.toContain("<!-- timeline:end -->");
+    expect(text).not.toContain("%% timeline:end %%");
     expect(escapeMarkdown("a_b `c`")).toBe("a\\_b \\`c\\`");
     expect(wikilink("Café [Mitte] | #2")).toBe("[[Café Mitte 2]]");
   });

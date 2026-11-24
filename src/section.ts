@@ -1,11 +1,19 @@
 /**
- * The block of a note the plugin owns: everything between two HTML comments, which Obsidian doesn't show in
- * reading view. Syncing replaces only what is between them, so the person's own writing anywhere else in the note,
- * the heading above the block included, is never touched.
+ * The block of a note the plugin owns: everything between two Obsidian comments, which Live Preview and Reading
+ * view hide unless the cursor is on them. Syncing replaces only what is between them, so the person's own writing
+ * anywhere else in the note, the heading above the block included, is never touched.
  */
 
-export const startMarker = "<!-- timeline:start -->";
-export const endMarker = "<!-- timeline:end -->";
+export const startMarker = "%% timeline:start %%";
+export const endMarker = "%% timeline:end %%";
+/** The first builds' HTML comments, which Live Preview shows as text. A sync swaps them for the markers above. */
+const legacyStart = "<!-- timeline:start -->";
+const legacyEnd = "<!-- timeline:end -->";
+
+/** Whether a note already has a managed block, in either kind of marker. */
+export function hasBlock(content: string): boolean {
+  return content.includes(startMarker) || content.includes(legacyStart);
+}
 
 export type BlockUpdate =
   | { kind: "replaced" | "insertedUnderHeading" | "appended"; content: string; changed: boolean }
@@ -26,10 +34,13 @@ function headingOf(line: string): { level: number; text: string } | null {
   return { level: match[1].length, text: (match[2] ?? "").trim().toLowerCase() };
 }
 
-function occurrences(content: string, marker: string): number[] {
-  const found: number[] = [];
-  for (let index = content.indexOf(marker); index >= 0; index = content.indexOf(marker, index + marker.length)) {
-    found.push(index);
+/** Where each of the markers appears, and how long that marker is. */
+function occurrences(content: string, markers: string[]): { index: number; length: number }[] {
+  const found: { index: number; length: number }[] = [];
+  for (const marker of markers) {
+    for (let index = content.indexOf(marker); index >= 0; index = content.indexOf(marker, index + marker.length)) {
+      found.push({ index, length: marker.length });
+    }
   }
   return found;
 }
@@ -47,15 +58,15 @@ export function blockText(body: string, newline = "\n"): string {
 export function upsertBlock(content: string, body: string, heading: string): BlockUpdate {
   const newline = content.includes("\r\n") ? "\r\n" : "\n";
   const block = blockText(body, newline);
-  const starts = occurrences(content, startMarker);
-  const ends = occurrences(content, endMarker);
+  const starts = occurrences(content, [startMarker, legacyStart]);
+  const ends = occurrences(content, [endMarker, legacyEnd]);
   if (starts.length > 1 || ends.length > 1 || starts.length !== ends.length) return { kind: "brokenMarkers" };
 
   const start = starts[0];
   const end = ends[0];
   if (start !== undefined && end !== undefined) {
-    if (end < start) return { kind: "brokenMarkers" };
-    const next = content.slice(0, start) + block + content.slice(end + endMarker.length);
+    if (end.index < start.index) return { kind: "brokenMarkers" };
+    const next = content.slice(0, start.index) + block + content.slice(end.index + end.length);
     return { kind: "replaced", content: next, changed: next !== content };
   }
 

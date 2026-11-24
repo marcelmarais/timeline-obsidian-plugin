@@ -48,13 +48,13 @@ Open the command palette and type "Timeline":
 
 ### Daily notes
 
-Syncing writes the stops between two hidden markers under a heading (`## Places` by default):
+Syncing writes the stops between two Obsidian comments under a heading (`## Places` by default):
 
 ```markdown
 ## Places
-<!-- timeline:start -->
+%% timeline:start %%
 - 09:05–17:40 · **Work** (8h 35m)
-<!-- timeline:end -->
+%% timeline:end %%
 ```
 
 Syncing again replaces only what is between the markers, so the stops update as the day goes on. The plugin never changes anything outside the markers, including the heading. You can rename the heading or move the block anywhere in the note. If you delete one marker by hand, the plugin leaves the note alone and tells you.

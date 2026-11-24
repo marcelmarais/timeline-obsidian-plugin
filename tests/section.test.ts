@@ -57,6 +57,18 @@ describe("the managed block", () => {
     expect(upsertBlock(twice, evening, "## Places").kind).toBe("brokenMarkers");
   });
 
+  it("swaps the first builds' HTML comments for Obsidian comments on the next sync", () => {
+    const old = `# Tuesday\n\n## Places\n<!-- timeline:start -->\n${morning}\n<!-- timeline:end -->\n\nAfterwards.`;
+    expect(content(upsertBlock(old, evening, "## Places"))).toBe(
+      `# Tuesday\n\n## Places\n${blockText(evening)}\n\nAfterwards.`,
+    );
+    expect(startMarker).toBe("%% timeline:start %%");
+    expect(upsertBlock(`<!-- timeline:start -->\n${morning}\n`, evening, "## Places").kind).toBe("brokenMarkers");
+    expect(upsertBlock(`${blockText(morning)}\n<!-- timeline:start -->`, evening, "## Places").kind).toBe(
+      "brokenMarkers",
+    );
+  });
+
   it("keeps Windows line endings", () => {
     const note = "Line one\r\nLine two\r\n";
     expect(content(upsertBlock(note, evening, "## Places"))).toBe(
