@@ -1,6 +1,6 @@
 {
   "name": "timeline-location-history",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Insert places recorded by the Timeline iPhone app into any note, or sync each day's stops to your daily notes.",
   "private": true,
   "type": "module",

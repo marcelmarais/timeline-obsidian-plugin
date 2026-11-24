@@ -15,6 +15,7 @@ Works on desktop, iPhone, iPad and Android.
 
 ## What you need
 
+- Obsidian 1.13 or later. Older versions of Obsidian get version 1.0.3 of the plugin.
 - The Timeline iPhone app with Timeline Pro ($3.99 a month or $29.99 a year, with a free week).
 - History sharing turned on: in the Timeline iPhone app, open **Settings › Agents › Other agent**, sign in, and choose what to share.
 
@@ -124,24 +125,10 @@ Tests in `tests/` cover formatting, block updates, dates and the API client with
 
 ## Releasing
 
+This folder is the root of [timeline-obsidian-plugin](https://github.com/marcelmarais/timeline-obsidian-plugin), the public repository Obsidian's community directory reads. Releases are made there.
+
 1. Bump the version: `npm version patch --no-git-tag-version` (or `minor`/`major`). This updates `package.json`, `manifest.json` and `versions.json`. Raise `minAppVersion` in `manifest.json` first if the release needs a newer Obsidian version.
 2. Run `npm run check`.
-3. Push the commit and a tag that matches the version exactly, without a `v`, such as `1.0.1`.
-4. Create a GitHub release for that tag and attach `main.js`, `manifest.json` and `styles.css` as separate files.
+3. Push the commit, then a tag that matches the version exactly, without a `v`, such as `1.0.4`. The Release workflow (`.github/workflows/release.yml`) checks and builds the plugin, attests where `main.js`, `manifest.json` and `styles.css` came from, and publishes them as that tag's release.
 
-First submission to the community directory:
-
-1. Copy this folder to [timeline-obsidian-plugin](https://github.com/marcelmarais/timeline-obsidian-plugin), the public repository Obsidian reads (`README.md`, `LICENSE` and `manifest.json` at its root), and make a release there as above.
-2. Fork [obsidianmd/obsidian-releases](https://github.com/obsidianmd/obsidian-releases), add an entry to the end of `community-plugins.json`, and open a pull request using the plugin template:
-
-   ```json
-   {
-     "id": "timeline-location-history",
-     "name": "Timeline Location History",
-     "author": "Marcel Marais",
-     "description": "Insert places recorded by the Timeline iPhone app into any note, or sync each day's stops to your daily notes.",
-     "repo": "marcelmarais/timeline-obsidian-plugin"
-   }
-   ```
-
-3. Address any checks from the review bot until a reviewer approves the pull request.
+The plugin is listed in Obsidian's [community directory](https://community.obsidian.md/plugins/timeline-location-history), which reviews each new release automatically and shows the results on the plugin's Scorecard.

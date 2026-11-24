@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { TimelineApi, TimelineError } from "../src/api";
 import {
   type AuthStorage,
+  base64Url,
   codeChallenge,
   type Http,
   type HttpRequest,
@@ -213,5 +214,21 @@ describe("reading history", () => {
     const api = new TimelineApi(http, new TimelineAuth(http, memoryStorage().storage));
     await expect(api.day("2026-11-24")).rejects.toMatchObject({ code: "notConnected" });
     expect(requests).toHaveLength(0);
+  });
+});
+
+describe("PKCE encoding", () => {
+  it("writes base64url without padding for every length", () => {
+    for (let length = 0; length <= 40; length++) {
+      const bytes = Uint8Array.from({ length }, (_, index) => (index * 97 + length * 13) % 256);
+      expect(base64Url(bytes)).toBe(Buffer.from(bytes).toString("base64url"));
+    }
+    expect(base64Url(Uint8Array.from([0xfb, 0xff, 0xbf]))).toBe("-_-_");
+  });
+
+  it("makes RFC 7636's example code challenge", async () => {
+    expect(await codeChallenge("dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk")).toBe(
+      "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+    );
   });
 });

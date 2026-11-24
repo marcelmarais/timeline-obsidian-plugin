@@ -81,11 +81,21 @@ export class AuthError extends Error {
   }
 }
 
-const base64Url = (bytes: Uint8Array) => {
-  let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-};
+const base64UrlAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+
+/** Base64url without padding (RFC 4648 §5), as PKCE needs, written out so the plugin has no runtime base64 calls. */
+export function base64Url(bytes: Uint8Array): string {
+  let text = "";
+  for (let index = 0; index < bytes.length; index += 3) {
+    const chunk = ((bytes[index] ?? 0) << 16) | ((bytes[index + 1] ?? 0) << 8) | (bytes[index + 2] ?? 0);
+    // One byte makes two characters, two make three, three make four.
+    const characters = Math.min(3, bytes.length - index) + 1;
+    for (let position = 0; position < characters; position++) {
+      text += base64UrlAlphabet[(chunk >> (18 - 6 * position)) & 63] ?? "";
+    }
+  }
+  return text;
+}
 
 export function randomToken(length = 32): string {
   const bytes = new Uint8Array(length);

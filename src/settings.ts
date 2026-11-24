@@ -1,4 +1,4 @@
-import { type App, PluginSettingTab, requireApiVersion, Setting } from "obsidian";
+import { type App, PluginSettingTab, type Setting } from "obsidian";
 import { detectDailyNotes } from "./daily-notes";
 import type { FormatOptions } from "./format";
 import type TimelinePlugin from "./main";
@@ -43,8 +43,8 @@ type BooleanKey = "autoSync" | "includeNotes" | "includeTravel" | "wikilinks";
 type TextKey = "dailyFolder" | "dailyFormat" | "heading";
 
 /**
- * The settings, defined once. Obsidian 1.13 and later draw them from `getSettingDefinitions()` and list them in
- * settings search; earlier versions call `display()`, which draws the same rows.
+ * The settings, defined once. Obsidian 1.13 and later draws them from `getSettingDefinitions()` and lists them in
+ * settings search.
  */
 export class TimelineSettingTab extends PluginSettingTab {
   constructor(
@@ -58,23 +58,9 @@ export class TimelineSettingTab extends PluginSettingTab {
     return [this.account(), this.dailyNotes(), this.formatting()];
   }
 
-  display(): void {
-    const { containerEl } = this;
-    containerEl.empty();
-    for (const group of this.getSettingDefinitions()) {
-      new Setting(containerEl).setName(group.heading).setHeading();
-      for (const row of group.items) {
-        const setting = new Setting(containerEl).setName(row.name);
-        if (row.desc) setting.setDesc(row.desc);
-        row.render(setting);
-      }
-    }
-  }
-
   /** Draws the tab again, for a change of connection or a problem to show. */
   refresh(): void {
-    if (requireApiVersion("1.13.0")) this.update();
-    else if (this.containerEl.isConnected) this.display();
+    this.update();
   }
 
   private account(): Group {
