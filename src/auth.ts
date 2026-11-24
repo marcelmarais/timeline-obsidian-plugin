@@ -148,11 +148,11 @@ export class TimelineAuth {
     });
     const body = parse(response.text);
     if (response.status !== 201 && response.status !== 200) {
-      throw new AuthError("signInFailed", "Timeline couldn't start the sign-in. Try again in a moment.");
+      throw new AuthError("signInFailed", "Timeline couldn't start sign-in. Try again in a moment.");
     }
     const clientId = body.client_id;
     if (typeof clientId !== "string") {
-      throw new AuthError("signInFailed", "Timeline couldn't start the sign-in. Try again in a moment.");
+      throw new AuthError("signInFailed", "Timeline couldn't start sign-in. Try again in a moment.");
     }
     await this.storage.saveClientId(clientId);
     return clientId;
@@ -180,11 +180,11 @@ export class TimelineAuth {
   async finishSignIn(params: Record<string, string>): Promise<void> {
     const pending = this.storage.loadPending();
     if (!pending || !params.state || params.state !== pending.state) {
-      throw new AuthError("signInFailed", "This sign-in link has expired. Connect again from the plugin settings.");
+      throw new AuthError("signInFailed", "This sign-in link has expired. Connect again in the plugin settings.");
     }
     this.storage.savePending(null);
     if (this.clock() - pending.startedAt > pendingLifetimeMs) {
-      throw new AuthError("signInFailed", "This sign-in link has expired. Connect again from the plugin settings.");
+      throw new AuthError("signInFailed", "This sign-in link has expired. Connect again in the plugin settings.");
     }
     if (params.iss && originOf(params.iss) !== timelineOrigin) {
       throw new AuthError("signInFailed", "That sign-in didn't come from Timeline.");
@@ -192,17 +192,17 @@ export class TimelineAuth {
     if (params.error) {
       throw new AuthError(
         "signInFailed",
-        params.error === "access_denied" ? "Sign-in was cancelled." : "Timeline couldn't finish the sign-in.",
+        params.error === "access_denied" ? "Sign-in was cancelled." : "Timeline couldn't finish signing in.",
       );
     }
-    if (!params.code) throw new AuthError("signInFailed", "Timeline couldn't finish the sign-in.");
+    if (!params.code) throw new AuthError("signInFailed", "Timeline couldn't finish signing in.");
     const tokens = await this.tokenRequest(pending.clientId, {
       grant_type: "authorization_code",
       code: params.code,
       code_verifier: pending.verifier,
       redirect_uri: redirectUri,
     });
-    if (!tokens) throw new AuthError("signInFailed", "Timeline couldn't finish the sign-in. Connect again.");
+    if (!tokens) throw new AuthError("signInFailed", "Timeline couldn't finish signing in. Connect again.");
     this.storage.saveTokens(tokens);
   }
 
@@ -265,7 +265,9 @@ export class TimelineAuth {
       method: "POST",
       form: { ...form, client_id: clientId, resource },
     });
-    if (response.status >= 500) throw new AuthError("network", "Timeline couldn't answer right now. Try again soon.");
+    if (response.status >= 500) {
+      throw new AuthError("network", "Timeline isn't responding right now. Try again in a moment.");
+    }
     if (response.status !== 200) return null;
     const body = parse(response.text);
     if (typeof body.access_token !== "string") return null;

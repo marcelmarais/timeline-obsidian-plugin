@@ -84,7 +84,7 @@ export class TimelineSettingTab extends PluginSettingTab {
       plugin.problem ??
       (connected
         ? "Connected. Places come from the history your iPhone shares with Timeline Pro."
-        : "Not connected. Sign in with Apple or Google in your browser, with the account you use in the Timeline iPhone app. Needs Timeline Pro, and your iPhone sharing its history.");
+        : "Not connected. Sign in with Apple or Google in your browser using the same account as the Timeline iPhone app. Requires Timeline Pro with history sharing turned on.");
     return {
       type: "group",
       heading: "Account",
@@ -136,7 +136,7 @@ export class TimelineSettingTab extends PluginSettingTab {
       items: [
         {
           name: "Keep daily notes up to date",
-          desc: "Update the places in today's daily note while it's open, and finish yesterday's when you open it. Never creates a note.",
+          desc: "Refresh today's daily note while it's open, and yesterday's when you open it if it already has places. It never creates a note.",
           aliases: ["Automatic sync", "Auto sync"],
           render: (setting) =>
             this.toggle(setting, "autoSync", (value) => {
@@ -155,7 +155,7 @@ export class TimelineSettingTab extends PluginSettingTab {
         },
         {
           name: "Heading",
-          desc: "The places go under this heading. Only the part between the plugin's markers is ever rewritten.",
+          desc: "Places go under this heading. Syncing only replaces the text between the plugin's markers.",
           render: (setting) => this.text(setting, "heading", defaultSettings.heading),
         },
       ],
@@ -169,12 +169,12 @@ export class TimelineSettingTab extends PluginSettingTab {
       items: [
         {
           name: "Include notes",
-          desc: "Add the notes written on a stop under it.",
+          desc: "List notes written on a stop underneath it.",
           render: (setting) => this.toggle(setting, "includeNotes"),
         },
         {
           name: "Include travel",
-          desc: "Add how you travelled between stops, when your iPhone recorded it.",
+          desc: "Add how you travelled between stops when your iPhone recorded it.",
           render: (setting) => this.toggle(setting, "includeTravel"),
         },
         {

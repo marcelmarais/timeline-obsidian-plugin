@@ -115,7 +115,7 @@ function stopTimes(stop: Stop, date: string, now: Date): { times: string; after:
     if (now.getTime() - Date.parse(stillThereAt) < nowWindowMs) return { times: `${timeOn(arrival, date)}–now`, after: "" };
     return { times: `since ${timeOn(arrival, date)}`, after: ` *(still there when last seen ${timeOn(stillThereAt, date)})*` };
   }
-  if (arrival) return { times: `since ${timeOn(arrival, date)}`, after: " *(no departure reported yet)*" };
+  if (arrival) return { times: `since ${timeOn(arrival, date)}`, after: " *(no departure reported)*" };
   if (departure) return { times: `until ${timeOn(departure, date)}`, after: " *(arrival not reported)*" };
   return { times: "", after: " *(time not reported)*" };
 }

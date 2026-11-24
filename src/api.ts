@@ -18,16 +18,16 @@ export type TimelineErrorCode =
 export const problemText: Record<TimelineErrorCode, string> = {
   notConnected: "Connect Timeline in the plugin settings first.",
   reconnect: "Timeline was disconnected. Connect again in the plugin settings.",
-  signInFailed: "Timeline couldn't finish the sign-in. Connect again in the plugin settings.",
+  signInFailed: "Timeline couldn't finish signing in. Connect again in the plugin settings.",
   network: "Couldn't reach Timeline. Check your connection and try again.",
   subscriptionNeeded:
-    "Places in Obsidian need Timeline Pro. Start it in the Timeline iPhone app under Settings › Timeline Pro, then sign in there with the same account.",
+    "Timeline Pro is required. Start it in the Timeline iPhone app under Settings › Timeline Pro, then sign in with the same account.",
   subscriptionEnded:
     "Timeline Pro has ended for this account. Renew it in the Timeline iPhone app under Settings › Timeline Pro to sync again.",
   nothingShared:
-    "Your iPhone isn't sharing any history yet. In the Timeline app, open Settings › Agents › Other agent, sign in with the same account and choose what to share.",
+    "Your iPhone isn't sharing any history yet. In the Timeline iPhone app, open Settings › Agents › Other agent, sign in with the same account, and choose what to share.",
   invalidDate: "Use a date written as YYYY-MM-DD.",
-  server: "Timeline couldn't answer right now. Try again in a moment.",
+  server: "Timeline isn't responding right now. Try again in a moment.",
 };
 
 export class TimelineError extends Error {

@@ -102,7 +102,7 @@ describe("a day's places", () => {
   it("never gives an end to a stop whose departure wasn't reported", () => {
     const open = stop({ arrival: "2026-11-24T20:10:00+01:00", place: place({ kind: "saved", name: "Home" }) });
     expect(formatDay(day({ stops: [open] }), defaultFormat, now)).toBe(
-      "- since 20:10 · **Home** *(no departure reported yet)*",
+      "- since 20:10 · **Home** *(no departure reported)*",
     );
     // Seen there long ago: it was still there then, not necessarily now.
     const stale = { ...open, stillThereAt: "2026-11-24T10:00:00+01:00", arrival: "2026-11-24T08:00:00+01:00" };

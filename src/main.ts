@@ -221,7 +221,7 @@ export default class TimelinePlugin extends Plugin {
       const body = await this.placesFor(date);
       const file = this.dailyNotes.find(date) ?? (await this.dailyNotes.create(date));
       const result = await this.writeBlock(file, body);
-      new Notice(result === "updated" ? `Updated the places in ${file.basename}.` : `${file.basename} is up to date.`);
+      new Notice(result === "updated" ? `Updated places in ${file.basename}.` : `${file.basename} is up to date.`);
     } catch (error) {
       this.report(error);
     }
@@ -230,7 +230,7 @@ export default class TimelinePlugin extends Plugin {
   private async syncNote(file: TFile, date: string): Promise<void> {
     try {
       const result = await this.syncFile(file, date);
-      new Notice(result === "updated" ? `Updated the places in ${file.basename}.` : `${file.basename} is up to date.`);
+      new Notice(result === "updated" ? `Updated places in ${file.basename}.` : `${file.basename} is up to date.`);
     } catch (error) {
       this.report(error);
     }

@@ -52,7 +52,7 @@ export function obsidianAuthStorage(
         if (tokens) {
           throw new AuthError(
             "signInFailed",
-            "Obsidian's secure storage isn't available on this device, so Timeline can't stay signed in here.",
+            "Obsidian's secure storage isn't available on this device, so Timeline can't save your sign-in.",
           );
         }
       }
