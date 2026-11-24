@@ -1,24 +1,14 @@
 /**
- * The block of a note the plugin owns: everything between two Obsidian comments, which Live Preview and Reading
- * view hide unless the cursor is on them. Syncing replaces only what is between them, so the person's own writing
- * anywhere else in the note, the heading above the block included, is never touched.
+ * The part of a note the plugin owns: the list of places directly under its heading (`## Places` by default). A sync
+ * replaces only the lines there that are shaped like its own output, so the person's own writing anywhere else in the
+ * note, the heading itself and anything they add under the list included, is never touched.
  */
 
-export const startMarker = "%% timeline:start %%";
-export const endMarker = "%% timeline:end %%";
-/** The first builds' HTML comments, which Live Preview shows as text. A sync swaps them for the markers above. */
-const legacyStart = "<!-- timeline:start -->";
-const legacyEnd = "<!-- timeline:end -->";
+/** The comments around the list in builds before 1.0.5. A sync replaces them, and what is between them, with the list. */
+const legacyStarts = ["%% timeline:start %%", "<!-- timeline:start -->"];
+const legacyEnds = ["%% timeline:end %%", "<!-- timeline:end -->"];
 
-/** Whether a note already has a managed block, in either kind of marker. */
-export function hasBlock(content: string): boolean {
-  return content.includes(startMarker) || content.includes(legacyStart);
-}
-
-export type BlockUpdate =
-  | { kind: "replaced" | "insertedUnderHeading" | "appended"; content: string; changed: boolean }
-  /** The markers are missing one half, repeated or out of order: the note is left alone. */
-  | { kind: "brokenMarkers" };
+export type BlockUpdate = { kind: "replaced" | "insertedUnderHeading" | "appended"; content: string; changed: boolean };
 
 /** "## Places" from "## Places", "Places" or "  ### Places  ". */
 export function normalizeHeading(heading: string): string {
@@ -34,57 +24,85 @@ function headingOf(line: string): { level: number; text: string } | null {
   return { level: match[1].length, text: (match[2] ?? "").trim().toLowerCase() };
 }
 
-/** Where each of the markers appears, and how long that marker is. */
-function occurrences(content: string, markers: string[]): { index: number; length: number }[] {
-  const found: { index: number; length: number }[] = [];
-  for (const marker of markers) {
-    for (let index = content.indexOf(marker); index >= 0; index = content.indexOf(marker, index + marker.length)) {
-      found.push({ index, length: marker.length });
-    }
-  }
-  return found;
-}
-
-/** The managed block's text: markers on their own lines around the body. */
-export function blockText(body: string, newline = "\n"): string {
-  const lines = body ? body.split(/\r?\n/) : [];
-  return [startMarker, ...lines, endMarker].join(newline);
-}
-
 /**
- * Puts `body` inside the note's managed block. A note with markers gets the text between them replaced; one without
- * gets the block under its `heading` if it has that heading, else the heading and block at its end.
+ * Whether a line is one the plugin writes: a stop, a trip or a place from photos ("- 09:05–17:40 · …"), a stop
+ * without times, a line in italics ("- *No stops recorded.*") or a note under a stop ("  - Note: …").
  */
-export function upsertBlock(content: string, body: string, heading: string): BlockUpdate {
-  const newline = content.includes("\r\n") ? "\r\n" : "\n";
-  const block = blockText(body, newline);
-  const starts = occurrences(content, [startMarker, legacyStart]);
-  const ends = occurrences(content, [endMarker, legacyEnd]);
-  if (starts.length > 1 || ends.length > 1 || starts.length !== ends.length) return { kind: "brokenMarkers" };
+export function isPlaceLine(line: string): boolean {
+  return (
+    /^- .+ · /.test(line) ||
+    /^- \*.+\*$/.test(line) ||
+    / \*\(time not reported\)\*$/.test(line) ||
+    /^ {2}- Note( \(.+\))?: /.test(line)
+  );
+}
 
-  const start = starts[0];
-  const end = ends[0];
-  if (start !== undefined && end !== undefined) {
-    if (end.index < start.index) return { kind: "brokenMarkers" };
-    const next = content.slice(0, start.index) + block + content.slice(end.index + end.length);
-    return { kind: "replaced", content: next, changed: next !== content };
-  }
-
+/** The first line of the note's `heading`, outside code blocks. */
+function headingLine(lines: string[], heading: string): number | null {
   const wanted = headingOf(normalizeHeading(heading));
-  const lines = content.split(newline);
   let inFence = false;
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index] ?? "";
     if (/^\s*(```|~~~)/.test(line)) inFence = !inFence;
     if (inFence) continue;
     const found = headingOf(line);
-    if (found && wanted && found.level === wanted.level && found.text === wanted.text) {
-      const after = lines.slice(index + 1);
-      // Directly under the heading; a blank line keeps it apart from what the person wrote there.
-      const rest = after.some((value) => value.trim() !== "") && (after[0] ?? "").trim() !== "" ? ["", ...after] : after;
-      const next = [...lines.slice(0, index + 1), ...block.split(newline), ...rest].join(newline);
-      return { kind: "insertedUnderHeading", content: next, changed: true };
-    }
+    if (found && wanted && found.level === wanted.level && found.text === wanted.text) return index;
+  }
+  return null;
+}
+
+/** Where the plugin's list starts and ends, as line indexes, after the blank lines below `heading`; empty when none. */
+function listAfter(lines: string[], heading: number): { from: number; to: number } {
+  let from = heading + 1;
+  while (from < lines.length && (lines[from] ?? "").trim() === "") from += 1;
+  let to = from;
+  while (to < lines.length && isPlaceLine(lines[to] ?? "")) to += 1;
+  return to > from ? { from, to } : { from: heading + 1, to: heading + 1 };
+}
+
+/** The first comment of an older build's list and the end comment after it, as line indexes. */
+function legacyBlock(lines: string[]): { from: number; to: number } | null {
+  const from = lines.findIndex((line) => legacyStarts.includes(line.trim()));
+  if (from < 0) return null;
+  const end = lines.findIndex((line, index) => index > from && legacyEnds.includes(line.trim()));
+  return end < 0 ? null : { from, to: end + 1 };
+}
+
+/** Whether a note already has the plugin's places under `heading`, or an older build's list. */
+export function hasPlaces(content: string, heading: string): boolean {
+  const lines = content.split(/\r?\n/);
+  if (legacyBlock(lines)) return true;
+  const index = headingLine(lines, heading);
+  if (index === null) return false;
+  const list = listAfter(lines, index);
+  return list.to > list.from;
+}
+
+/**
+ * Puts `body` under the note's `heading`: it replaces the plugin's list there, or goes directly under the heading when
+ * it has none yet. A note without the heading gets the heading and list at its end.
+ */
+export function upsertBlock(content: string, body: string, heading: string): BlockUpdate {
+  const newline = content.includes("\r\n") ? "\r\n" : "\n";
+  const lines = content.split(newline);
+  const bodyLines = body ? body.split(/\r?\n/) : [];
+  const replace = (from: number, to: number): BlockUpdate => {
+    const next = [...lines.slice(0, from), ...bodyLines, ...lines.slice(to)].join(newline);
+    return { kind: "replaced", content: next, changed: next !== content };
+  };
+
+  const legacy = legacyBlock(lines);
+  if (legacy) return replace(legacy.from, legacy.to);
+
+  const index = headingLine(lines, heading);
+  if (index !== null) {
+    const list = listAfter(lines, index);
+    if (list.to > list.from) return replace(list.from, list.to);
+    const after = lines.slice(index + 1);
+    // Directly under the heading; a blank line keeps it apart from what the person wrote there.
+    const rest = after.some((value) => value.trim() !== "") && (after[0] ?? "").trim() !== "" ? ["", ...after] : after;
+    const next = [...lines.slice(0, index + 1), ...bodyLines, ...rest].join(newline);
+    return { kind: "insertedUnderHeading", content: next, changed: true };
   }
 
   // Added after a blank line; the note's own text, trailing blank lines included, stays as it was.
@@ -96,13 +114,13 @@ export function upsertBlock(content: string, body: string, heading: string): Blo
         : content.endsWith(newline)
           ? newline
           : `${newline}${newline}`;
-  const next = `${content}${separator}${normalizeHeading(heading)}${newline}${block}${newline}`;
+  const next = `${content}${separator}${[normalizeHeading(heading), ...bodyLines].join(newline)}${newline}`;
   return { kind: "appended", content: next, changed: true };
 }
 
 /**
  * The smallest edit that turns `before` into `after`, as offsets into `before`, so an open editor keeps the cursor,
- * selection and undo history outside the block.
+ * selection and undo history outside the list.
  */
 export function minimalEdit(before: string, after: string): { from: number; to: number; text: string } | null {
   if (before === after) return null;

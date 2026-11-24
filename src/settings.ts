@@ -141,7 +141,7 @@ export class TimelineSettingTab extends PluginSettingTab {
         },
         {
           name: "Heading",
-          desc: "Places go under this heading. Syncing only replaces the text between the plugin's markers.",
+          desc: "Places go in a list under this heading. Syncing replaces only that list.",
           render: (setting) => this.text(setting, "heading", defaultSettings.heading),
         },
       ],

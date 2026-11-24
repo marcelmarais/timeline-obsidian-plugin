@@ -6,7 +6,7 @@ import { DateModal } from "./date-modal";
 import { addDays, localToday } from "./dates";
 import { formatCurrent, formatDay } from "./format";
 import { obsidianAuthStorage, obsidianHttp } from "./obsidian-http";
-import { endMarker, hasBlock, minimalEdit, startMarker, upsertBlock } from "./section";
+import { hasPlaces, minimalEdit, upsertBlock } from "./section";
 import { defaultSettings, type TimelineSettings, TimelineSettingTab } from "./settings";
 
 /** How often an open daily note for today is refreshed. */
@@ -18,18 +18,8 @@ const newNoteMs = 10 * 1000;
 
 type SyncResult = "updated" | "unchanged";
 
-/** A note whose markers were edited by hand: it is left alone rather than guessed at. */
-class BrokenMarkers extends Error {
-  constructor(file: TFile) {
-    super(
-      `${file.basename} has an incomplete Timeline block. Keep both the ${startMarker} and ${endMarker} lines, or remove both, and sync again.`,
-    );
-    this.name = "BrokenMarkers";
-  }
-}
-
 function messageOf(error: unknown): string {
-  if (error instanceof TimelineError || error instanceof AuthError || error instanceof BrokenMarkers) {
+  if (error instanceof TimelineError || error instanceof AuthError) {
     return error.message;
   }
   return "Something went wrong. Try again.";
@@ -263,7 +253,7 @@ export default class TimelinePlugin extends Plugin {
       await this.quietSync(file, date);
     } else if (date === addDays(today, -1)) {
       const content = await this.app.vault.cachedRead(file);
-      if (hasBlock(content)) await this.quietSync(file, date);
+      if (hasPlaces(content, this.settings.heading)) await this.quietSync(file, date);
     }
   }
 
@@ -297,8 +287,8 @@ export default class TimelinePlugin extends Plugin {
   }
 
   /**
-   * Writes the places into the note's managed block. A note open in an editor is changed through the editor, only
-   * where the block changed, so the cursor and undo history stay as they were.
+   * Writes the places under the note's heading. A note open in an editor is changed through the editor, only
+   * where the list changed, so the cursor and undo history stay as they were.
    */
   private async writeBlock(file: TFile, body: string): Promise<SyncResult> {
     this.lastSynced.set(file.path, Date.now());
@@ -306,27 +296,14 @@ export default class TimelinePlugin extends Plugin {
     const editor = this.editorFor(file);
     if (editor) {
       const before = editor.getValue();
-      const update = upsertBlock(before, body, heading);
-      if (update.kind === "brokenMarkers") throw new BrokenMarkers(file);
-      const edit = minimalEdit(before, update.content);
+      const edit = minimalEdit(before, upsertBlock(before, body, heading).content);
       if (!edit) return "unchanged";
       editor.replaceRange(edit.text, editor.offsetToPos(edit.from), editor.offsetToPos(edit.to));
       return "updated";
     }
 
-    const check = upsertBlock(await this.app.vault.read(file), body, heading);
-    if (check.kind === "brokenMarkers") throw new BrokenMarkers(file);
-    if (!check.changed) return "unchanged";
-    let broken = false;
-    await this.app.vault.process(file, (content) => {
-      const update = upsertBlock(content, body, heading);
-      if (update.kind === "brokenMarkers") {
-        broken = true;
-        return content;
-      }
-      return update.content;
-    });
-    if (broken) throw new BrokenMarkers(file);
+    if (!upsertBlock(await this.app.vault.read(file), body, heading).changed) return "unchanged";
+    await this.app.vault.process(file, (content) => upsertBlock(content, body, heading).content);
     return "updated";
   }
 }

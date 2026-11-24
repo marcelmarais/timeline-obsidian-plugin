@@ -49,18 +49,17 @@ Open the command palette and type "Timeline":
 
 ### Daily notes
 
-Syncing writes the stops between two Obsidian comments under a heading (`## Places` by default):
+Syncing writes the stops as a list under a heading (`## Places` by default):
 
 ```markdown
 ## Places
-%% timeline:start %%
 - 09:05–17:40 · **Work** (8h 35m)
-%% timeline:end %%
+- 20:10–now · **Home**
 ```
 
-Syncing again replaces only what is between the markers, so the stops update as the day goes on. The plugin never changes anything outside the markers, including the heading. You can rename the heading or move the block anywhere in the note. If one of the markers is missing, the plugin leaves the note alone and tells you.
+Syncing again replaces that list, so the stops update as the day goes on. It changes only lines shaped like the plugin's own, so anything else you write under the heading, and everywhere else in the note, stays as it is. If the note doesn't have the heading, the next sync adds it at the end.
 
-With **Keep daily notes up to date** turned on, today's daily note refreshes when opened and every 10 minutes while open. Yesterday's daily note refreshes on open if it already has a Timeline block. Automatic syncing never creates a note.
+With **Keep daily notes up to date** turned on, today's daily note refreshes when opened and every 10 minutes while open. Yesterday's daily note refreshes on open if it already has places. Automatic syncing never creates a note.
 
 The plugin reads your daily notes folder and date format from Obsidian's Daily notes plugin, or from Periodic Notes when that manages your daily notes. You can override either in the settings. When the plugin creates today's note, it fills in your daily notes template.
 
@@ -116,7 +115,7 @@ The source is in `src/`:
 - `auth.ts`: OAuth 2.1 with PKCE and refresh tokens.
 - `api.ts`: Timeline API requests and error messages.
 - `format.ts`: Markdown formatting.
-- `section.ts`: managed block updates in notes.
+- `section.ts`: finds and updates the list of places under the heading in a note.
 - `dates.ts` and `daily-notes.ts`: dates and daily notes.
 - `date-modal.ts` and `settings.ts`: the date picker and the settings.
 - `obsidian-http.ts`: `requestUrl` wrapper and device-only token storage.

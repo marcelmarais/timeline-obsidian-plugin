@@ -53,8 +53,8 @@ export function formatDuration(ms: number): string {
 }
 
 /**
- * Text from Timeline, escaped so Markdown shows it as written: no accidental emphasis, links, tags, maths or HTML,
- * and never a line that could pass for the managed block's markers.
+ * Text from Timeline, escaped so Markdown shows it as written: no accidental emphasis, links, tags, maths, comments
+ * or HTML.
  */
 export function escapeMarkdown(text: string): string {
   return text
@@ -146,14 +146,14 @@ function travelLine(legs: Leg[] | null, date: string): string | null {
   return `- ${timeOn(first.start, date)}–${timeOn(last.end, date)} · *${parts.join(", then ")}*`;
 }
 
-/** Why a day lists nothing, in one quiet line. */
+/** Why a day lists nothing, in one quiet line. Every line is a list item, so the list under the heading stays whole. */
 function emptyLine(day: Day): string | null {
-  if (day.status === "future") return "*This day hasn't happened yet.*";
-  if (day.status === "notUploaded") return "*Not uploaded from your iPhone yet.*";
-  if (day.status === "beforeFirstUpload") return "*No history for this day.*";
+  if (day.status === "future") return "- *This day hasn't happened yet.*";
+  if (day.status === "notUploaded") return "- *Not uploaded from your iPhone yet.*";
+  if (day.status === "beforeFirstUpload") return "- *No history for this day.*";
   if (day.recording === "off") return null;
-  if (day.recording === "beforeRecordingStarted") return "*Before recording started.*";
-  return "*No stops recorded.*";
+  if (day.recording === "beforeRecordingStarted") return "- *Before recording started.*";
+  return "- *No stops recorded.*";
 }
 
 const placeFields: Place = { kind: "named", name: null, address: null, city: null, category: null, chosenBy: null };
@@ -161,8 +161,8 @@ const placeFields: Place = { kind: "named", name: null, address: null, city: nul
 /** A day's places as Markdown lines, without a trailing newline. */
 export function formatDay(day: Day, options: FormatOptions = defaultFormat, now = new Date()): string {
   const lines: string[] = [];
-  if (day.sharedFrom) lines.push(`*Only history after ${timeOn(day.sharedFrom, day.date)} was shared.*`);
-  if (day.recording === "off") lines.push("*Location recording was off.*");
+  if (day.sharedFrom) lines.push(`- *Only history after ${timeOn(day.sharedFrom, day.date)} was shared.*`);
+  if (day.recording === "off") lines.push("- *Location recording was off.*");
   // Places from photos: when the first and last photo there were taken. Nothing says when the person came or went.
   for (const photo of day.photoPlaces) {
     const first = timeOn(photo.firstPhoto, day.date);

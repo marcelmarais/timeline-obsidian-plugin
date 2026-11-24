@@ -172,32 +172,32 @@ describe("a day's places", () => {
   });
 
   it("says why a day has nothing, without inventing a quiet day", () => {
-    expect(formatDay(day({ status: "future", recording: null }))).toBe("*This day hasn't happened yet.*");
-    expect(formatDay(day({ status: "notUploaded", recording: null }))).toBe("*Not uploaded from your iPhone yet.*");
-    expect(formatDay(day({ status: "beforeFirstUpload", recording: null }))).toBe("*No history for this day.*");
-    expect(formatDay(day({}))).toBe("*No stops recorded.*");
-    expect(formatDay(day({ recording: "off" }))).toBe("*Location recording was off.*");
-    expect(formatDay(day({ recording: "beforeRecordingStarted" }))).toBe("*Before recording started.*");
+    expect(formatDay(day({ status: "future", recording: null }))).toBe("- *This day hasn't happened yet.*");
+    expect(formatDay(day({ status: "notUploaded", recording: null }))).toBe("- *Not uploaded from your iPhone yet.*");
+    expect(formatDay(day({ status: "beforeFirstUpload", recording: null }))).toBe("- *No history for this day.*");
+    expect(formatDay(day({}))).toBe("- *No stops recorded.*");
+    expect(formatDay(day({ recording: "off" }))).toBe("- *Location recording was off.*");
+    expect(formatDay(day({ recording: "beforeRecordingStarted" }))).toBe("- *Before recording started.*");
     expect(formatDay(day({ sharedFrom: "2026-11-24T14:00:00+01:00", stops: [home] }), defaultFormat, now)).toBe(
-      "*Only history after 14:00 was shared.*\n- 20:10–now · **Home**",
+      "- *Only history after 14:00 was shared.*\n- 20:10–now · **Home**",
     );
   });
 
-  it("escapes Markdown in names and notes, so nothing can pass for the block's markers", () => {
+  it("escapes Markdown in names and notes, so nothing turns into a comment, link or formatting", () => {
     const tricky = stop({
       arrival: "2026-11-24T12:00:00+01:00",
       departure: "2026-11-24T12:30:00+01:00",
       place: place({ name: "*Bar* <b>#1</b> $5 [x]" }),
-      notes: [{ author: "you", text: "%% timeline:end %%\nnext line", yours: true }],
+      notes: [{ author: "you", text: "%% hidden %%\nnext line", yours: true }],
     });
     const text = formatDay(day({ stops: [tricky] }), defaultFormat, now);
     expect(text).toBe(
       [
         "- 12:00–12:30 · **\\*Bar\\* \\<b\\>\\#1\\</b\\> \\$5 \\[x\\]** (30m)",
-        "  - Note: \\%\\% timeline:end \\%\\% next line",
+        "  - Note: \\%\\% hidden \\%\\% next line",
       ].join("\n"),
     );
-    expect(text).not.toContain("%% timeline:end %%");
+    expect(text).not.toContain("%% hidden %%");
     expect(escapeMarkdown("a_b `c`")).toBe("a\\_b \\`c\\`");
     expect(wikilink("Café [Mitte] | #2")).toBe("[[Café Mitte 2]]");
   });
