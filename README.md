@@ -1,4 +1,4 @@
-# Timeline: Location History
+# Timeline Location History
 
 Insert places recorded by the [Timeline](https://timeline.place) iPhone app into any Obsidian note, or sync each day's stops to your daily notes.
 
@@ -22,13 +22,13 @@ The plugin reads your shared Timeline Pro history over the network. It has no of
 
 ## Install
 
-From Obsidian: open **Settings › Community plugins › Browse**, search for **Timeline: Location History**, then select **Install** and **Enable**.
+From Obsidian: open **Settings › Community plugins › Browse**, search for **Timeline Location History**, then select **Install** and **Enable**.
 
 By hand: copy `main.js`, `manifest.json` and `styles.css` from a [release](../../releases) into `<your vault>/.obsidian/plugins/timeline-location-history/`, then enable the plugin under **Settings › Community plugins**.
 
 ## Connect
 
-1. Open **Settings › Timeline: Location History** and choose **Connect**.
+1. Open **Settings › Timeline Location History** and choose **Connect**.
 2. Your browser opens Timeline. Sign in with Apple or Google using the same account as the Timeline iPhone app, then choose **Allow**.
 3. The browser sends you back to Obsidian, which shows "Connected to Timeline."
 
@@ -131,13 +131,13 @@ Tests in `tests/` cover formatting, block updates, dates and the API client with
 
 First submission to the community directory:
 
-1. Copy this folder to [timeline-obsidian-plugin](https://github.com/marcelmarais/timeline-obsidian-plugin), the public repository Obsidian reads (`README.md`, `LICENSE` and `manifest.json` at its root), and make the `1.0.0` release there as above.
+1. Copy this folder to [timeline-obsidian-plugin](https://github.com/marcelmarais/timeline-obsidian-plugin), the public repository Obsidian reads (`README.md`, `LICENSE` and `manifest.json` at its root), and make a release there as above.
 2. Fork [obsidianmd/obsidian-releases](https://github.com/obsidianmd/obsidian-releases), add an entry to the end of `community-plugins.json`, and open a pull request using the plugin template:
 
    ```json
    {
      "id": "timeline-location-history",
-     "name": "Timeline: Location History",
+     "name": "Timeline Location History",
      "author": "Marcel Marais",
      "description": "Insert places recorded by the Timeline iPhone app into any note, or sync each day's stops to your daily notes.",
      "repo": "marcelmarais/timeline-obsidian-plugin"
