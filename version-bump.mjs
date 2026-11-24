@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import process from "node:process";
 
-// `pnpm version patch|minor|major` sets package.json's version; this copies it to manifest.json and versions.json.
+// `npm version patch|minor|major` sets package.json's version; this copies it to manifest.json and versions.json.
 const targetVersion = process.env.npm_package_version;
 const manifest = JSON.parse(readFileSync("manifest.json", "utf8"));
 const { minAppVersion } = manifest;

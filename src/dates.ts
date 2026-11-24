@@ -1,11 +1,21 @@
-import type { moment } from "obsidian";
-
 /**
  * Dates and daily note paths. Moment is passed in: Obsidian ships it (and daily note formats are Moment formats),
  * so the plugin uses Obsidian's copy and the tests their own.
  */
 
-export type Moment = typeof moment;
+/** The few Moment methods used here, so the types never depend on how Moment's own typings resolve. */
+export interface MomentValue {
+  format(format?: string): string;
+  isValid(): boolean;
+  clone(): MomentValue;
+  set(values: { hour: number; minute: number; second: number }): MomentValue;
+  hour(): number;
+  minute(): number;
+  second(): number;
+}
+
+/** Moment's factory: `moment("2026-11-24", "YYYY-MM-DD", true)` or `moment(new Date())`. */
+export type Moment = (input?: string | Date, format?: string, strict?: boolean) => MomentValue;
 
 export interface DailyNoteConfig {
   /** The folder, relative to the vault, without leading or trailing slashes; "" for the vault root. */

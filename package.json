@@ -1,6 +1,6 @@
 {
   "name": "timeline-location-history",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Insert places recorded by the Timeline iPhone app into any note, or sync each day's stops to your daily notes.",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
+    "check": "npm run typecheck && npm run lint && npm test && npm run build",
     "version": "node version-bump.mjs && git add manifest.json versions.json"
   },
   "author": "Marcel Marais",
@@ -27,10 +27,5 @@
     "typescript": "5.9.3",
     "typescript-eslint": "8.72.1",
     "vitest": "3.2.4"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
   }
 }

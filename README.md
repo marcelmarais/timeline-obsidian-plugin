@@ -98,9 +98,9 @@ The plugin connects only to `https://timeline.place` (Timeline's server), and on
 ## Development
 
 ```sh
-pnpm install
-pnpm dev        # rebuilds main.js on change
-pnpm check      # typecheck, lint (eslint-plugin-obsidianmd), tests, production build
+npm install
+npm run dev     # rebuilds main.js on change
+npm run check   # typecheck, lint (eslint-plugin-obsidianmd), tests, production build
 ```
 
 To try it in a vault, link this folder into the vault's plugins folder and enable the plugin:
@@ -124,8 +124,8 @@ Tests in `tests/` cover formatting, block updates, dates and the API client with
 
 ## Releasing
 
-1. Bump the version: `pnpm version patch` (or `minor`/`major`). This updates `package.json`, `manifest.json` and `versions.json`. Raise `minAppVersion` in `manifest.json` first if the release needs a newer Obsidian version.
-2. Run `pnpm check`.
+1. Bump the version: `npm version patch --no-git-tag-version` (or `minor`/`major`). This updates `package.json`, `manifest.json` and `versions.json`. Raise `minAppVersion` in `manifest.json` first if the release needs a newer Obsidian version.
+2. Run `npm run check`.
 3. Push the commit and a tag that matches the version exactly, without a `v`, such as `1.0.1`.
 4. Create a GitHub release for that tag and attach `main.js`, `manifest.json` and `styles.css` as separate files.
 
