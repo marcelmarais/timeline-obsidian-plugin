@@ -131,7 +131,7 @@ The tests in `tests/` cover the formatting, the block updates, dates and the API
 
 The first submission to the community directory:
 
-1. Publish this folder as its own public GitHub repository, with `README.md`, `LICENSE` and `manifest.json` at its root, and make the `1.0.0` release as above.
+1. Copy this folder to [timeline-obsidian-plugin](https://github.com/marcelmarais/timeline-obsidian-plugin), the public repository Obsidian reads (`README.md`, `LICENSE` and `manifest.json` at its root), and make the `1.0.0` release there as above.
 2. Fork [obsidianmd/obsidian-releases](https://github.com/obsidianmd/obsidian-releases), add an entry to the end of `community-plugins.json`, and open a pull request using the plugin template:
 
    ```json
@@ -140,7 +140,7 @@ The first submission to the community directory:
      "name": "Timeline: Location History",
      "author": "Marcel Marais",
      "description": "Insert the places your iPhone recorded with Timeline into any note, and keep a list of the day's stops in your daily notes.",
-     "repo": "<owner>/<repository>"
+     "repo": "marcelmarais/timeline-obsidian-plugin"
    }
    ```
 
